@@ -27,7 +27,7 @@ const SRC_CHIP: Record<string, string> = {
 export function OrderDrawer({ order, statuses, sources, onClose, onSaved }: Props) {
   const isEdit = !!order;
   const [form, setForm] = useState<any>({
-    customerName: "", contactNumber: "", productName: "Max X7", quantity: 1, price: 999,
+    customerName: "", contactNumber: "", productName: "Takat power X", quantity: 1, price: 999,
     address: "", city: "", pincode: "", source: "Calling", paymentStatus: "Pending", orderStatus: "New", remark: "",
   });
   const [states, setStates] = useState<{ id: number; name: string }[]>([]);
