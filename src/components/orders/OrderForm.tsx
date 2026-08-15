@@ -26,7 +26,7 @@ export function OrderForm({ orderId }: { orderId?: string }) {
   const { can } = useAuth();
   const isEdit = !!orderId;
   const [form, setForm] = useState<any>({
-    customerName: "", contactNumber: "", altMobile: "", email: "", productName: "Max X7", quantity: 1, price: 999,
+    customerName: "", contactNumber: "", altMobile: "", email: "", productName: "Takat power x", quantity: 1, price: 999,
     totalAmount: "", onlinePaid: 0, paymentMode: "COD", address: "", city: "", pincode: "", stateId: "", districtId: "",
     source: "Calling", paymentStatus: "Pending", orderStatus: "New", remark: "", leadOwnerId: "", followUpDate: "", dealerId: "",
   });
@@ -161,7 +161,7 @@ export function OrderForm({ orderId }: { orderId?: string }) {
     if (form.altMobile) lines.push("Alternate Mobile: " + form.altMobile);
     lines.push("Address: " + [form.address, form.city, districtName, stateName, form.pincode ? "Pincode " + form.pincode : ""].filter(Boolean).join(", "));
     lines.push("");
-    lines.push("Product: " + (form.productName || "Max X7"));
+    lines.push("Product: " + (form.productName || "Takat power x"));
     lines.push("Quantity: " + qty);
     lines.push("Total Amount: " + R + total);
     lines.push("Online Paid: " + R + (Number(form.onlinePaid) || 0));
