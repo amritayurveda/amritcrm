@@ -10,7 +10,7 @@ import { useAuth } from "@/store/auth";
 import type { Order } from "@/types";
 import { SmartImport } from "@/components/orders/SmartImport";
 import { BUCKET_MAP } from "@/lib/statuses";
-import { DEFAULT_PREFERENCES } from "@/lib/crmDefaults";
+import { DEFAULT_PREFERENCES, DEFAULT_STATUSES } from "@/lib/crmDefaults";
 
 const STATUS_COLORS: Record<string, string> = {
   New: "bg-blue-100 text-blue-700", Confirmed: "bg-emerald-100 text-emerald-700",
@@ -49,6 +49,7 @@ export default function OrdersPage() {
   const [limit, setLimit] = useState("20");
   const [showFilters, setShowFilters] = useState(true);
   const [statuses, setStatuses] = useState<string[]>([]);
+  const effectiveStatuses = useMemo(() => Array.from(new Set([...DEFAULT_STATUSES.map((s) => s.name), ...statuses])), [statuses]);
   const [statusOpen, setStatusOpen] = useState(false);
   const [sourceNames, setSourceNames] = useState<string[]>([]);
   const [shipStatusList, setShipStatusList] = useState<string[]>([]);
@@ -430,7 +431,7 @@ export default function OrdersPage() {
                 <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setStatusOpen(false)} />
                 <div className="fixed inset-x-3 bottom-3 z-50 max-h-[76vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-200">
                   <div className="sticky top-0 flex items-center justify-between border-b bg-white px-4 py-3"><b>Select status</b><button type="button" onClick={() => setStatusOpen(false)} className="text-sm font-semibold text-gray-500">Close</button></div>
-                  {["", ...statuses].map((s) => <button key={s || "all"} type="button" onClick={() => { sf("status", s); setStatusOpen(false); }} className="flex w-full items-center justify-between border-b px-4 py-4 text-left text-base hover:bg-gray-50">
+                  {["", ...effectiveStatuses].map((s) => <button key={s || "all"} type="button" onClick={() => { sf("status", s); setStatusOpen(false); }} className="flex w-full items-center justify-between border-b px-4 py-4 text-left text-base hover:bg-gray-50">
                     <span className="font-medium">{s || "All"}</span><span className={form.status === s ? "h-5 w-5 rounded-full border-[6px] border-emerald-500" : "h-5 w-5 rounded-full border-2 border-gray-300"} />
                   </button>)}
                 </div>
@@ -482,7 +483,7 @@ export default function OrdersPage() {
             <div><label className="label">Booked date to</label><input type="date" className="input" value={form.bookedTo} onChange={(e) => sf("bookedTo", e.target.value)} /></div>
             <div><label className="label" style={{color:"#0ea5e9"}}>Status changed from</label><input type="date" className="input" value={form.statusFrom} onChange={(e) => sf("statusFrom", e.target.value)} /></div>
             <div><label className="label" style={{color:"#0ea5e9"}}>Status changed to</label><input type="date" className="input" value={form.statusTo} onChange={(e) => sf("statusTo", e.target.value)} /></div>
-            <div><label className="label" style={{color:"#0ea5e9"}}>Status changed = (kaun-sa)</label><select className="input" value={form.statusChange} onChange={(e) => sf("statusChange", e.target.value)}><option value="">Any status</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
+            <div><label className="label" style={{color:"#0ea5e9"}}>Status changed = (kaun-sa)</label><select className="input" value={form.statusChange} onChange={(e) => sf("statusChange", e.target.value)}><option value="">Any status</option>{effectiveStatuses.map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
           </div>
           <div className="flex items-center gap-2 mt-3">
             <span className="text-xs font-medium text-emerald-600">Filters apply live</span>
@@ -526,7 +527,7 @@ export default function OrdersPage() {
           {canBulkStatus && (
             <div className="flex items-center gap-2">
               <select className="input w-44" value={bStatus} onChange={(e) => setBStatus(e.target.value)}>
-                <option value="">Set status...</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                <option value="">Set status...</option>{effectiveStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
               </select>
               <button className="btn btn-primary" disabled={!bStatus} onClick={bulkStatus}>Apply status</button>
             </div>
@@ -600,7 +601,7 @@ export default function OrdersPage() {
                 <td className={"px-3 py-2 sticky z-[5] " + (canBulk ? "left-[24rem]" : "left-[22.5rem]") + " " + (sel.includes(o.id) ? "bg-brand-light/40" : (rowIdx%2===1 ? "bg-slate-50" : "bg-white"))}>
                   {can("orders.changeStatus") ? (
                     <select className={"badge border-2 px-2 py-1 text-xs font-bold cursor-pointer focus:outline-none transition " + (STATUS_COLORS[o.orderStatus] ?? "bg-gray-100 text-gray-700")} style={{borderColor:shx(o.orderStatus), boxShadow:"0 0 0 2px "+shx(o.orderStatus)+"22"}} value={o.orderStatus} onChange={(e) => quickStatus(o, e.target.value)}>
-                      {statuses.map((s) => <option key={s} value={s}>{s}</option>)}
+                      {effectiveStatuses.map((s) => <option key={s} value={s}>{s}</option>)}
                     </select>
                   ) : <span className={"badge border-2 px-2 py-1 text-xs font-bold " + (STATUS_COLORS[o.orderStatus] ?? "bg-gray-100 text-gray-700")} style={{borderColor:shx(o.orderStatus)}}>{o.orderStatus}</span>}
                 </td>
