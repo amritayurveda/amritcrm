@@ -15,7 +15,8 @@ export async function POST(req: NextRequest) {
 
   let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
 
-  // Repair a missing or stale Super Admin record after a database change.
+  // Bootstrap a missing Super Admin record after a database change.
+  // Never overwrite an existing password or reactivate a disabled account.
   // This path is only available when the submitted credentials exactly match
   // the private values configured in the deployment environment.
   if (
@@ -23,7 +24,7 @@ export async function POST(req: NextRequest) {
     configuredPassword &&
     normalizedEmail === configuredEmail &&
     password === configuredPassword &&
-    (!user || !user.isActive || !(await verifyPassword(password, user.passwordHash)))
+    !user
   ) {
     user = await prisma.user.upsert({
       where: { email: configuredEmail },
