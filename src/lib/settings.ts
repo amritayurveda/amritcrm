@@ -46,7 +46,14 @@ export async function getStatusConfig(): Promise<StatusItem[]> {
         core: CORE_STATUS_NAMES.includes(name),
       });
     }
-    for (const d of DEFAULT_STATUSES) if (!seen.has(d.name.toLowerCase())) list.push({ ...d });
+    // Core workflow statuses are mandatory for the order screen. Older saved
+    // Settings records may predate new statuses or have them disabled, so keep
+    // every core option visible in every status dropdown.
+    for (const d of DEFAULT_STATUSES) {
+      const existing = list.find((s) => s.name.toLowerCase() === d.name.toLowerCase());
+      if (existing) { existing.enabled = true; existing.core = true; }
+      else list.push({ ...d });
+    }
     const nw = list.find((s) => s.name === "New"); if (nw) nw.enabled = true;
     return list.length ? list : DEFAULT_STATUSES;
   } catch (e) {
