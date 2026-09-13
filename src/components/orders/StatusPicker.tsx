@@ -1,13 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { DEFAULT_STATUSES } from "@/lib/crmDefaults";
 
 type Props = { value: string; statuses: string[]; onChange: (status: string) => void };
 
 /** Mobile-friendly order-status picker used in create and edit forms. */
 export function StatusPicker({ value, statuses, onChange }: Props) {
   const [open, setOpen] = useState(false);
-  const list = Array.from(new Set([value, ...statuses].filter(Boolean)));
+  // Keep the complete workflow available even when the remote settings API is
+  // slow, unavailable, or still contains an older saved status list.
+  const list = Array.from(new Set([value, ...DEFAULT_STATUSES.map((s) => s.name), ...statuses].filter(Boolean)));
   return <>
     <button type="button" onClick={() => setOpen(true)} className="input w-full flex items-center justify-between text-left">
       <span>{value || "Select status"}</span><span className="text-gray-400">&#9662;</span>
