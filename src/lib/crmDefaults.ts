@@ -53,6 +53,7 @@ export const STATUSES_KEY = "crm.statuses";
 export const DEFAULT_STATUSES: StatusItem[] = [
   { name: "New",             color: "#3b82f6", enabled: true, core: true },
   { name: "Confirm Pending", color: "#f59e0b", enabled: true, core: true },
+  { name: "Confirm",         color: "#16a34a", enabled: true, core: true },
   { name: "Confirmed",       color: "#16a34a", enabled: true, core: true },
   { name: "In Transit",      color: "#0891b2", enabled: true, core: true },
   { name: "Delivered",       color: "#15803d", enabled: true, core: true },
@@ -66,6 +67,7 @@ export const DEFAULT_STATUSES: StatusItem[] = [
   { name: "Confirm cancel",  color: "#ef4444", enabled: true, core: true },
   { name: "Cancel pending",  color: "#f97316", enabled: true, core: true },
   { name: "Final cancel",    color: "#dc2626", enabled: true, core: true },
+  { name: "Cancel",          color: "#dc2626", enabled: true, core: true },
   { name: "Cancelled",       color: "#dc2626", enabled: true, core: true },
   { name: "Dealer Cancel",   color: "#b91c1c", enabled: true, core: true },
   { name: "Future Delivery", color: "#0ea5e9", enabled: true, core: true },
