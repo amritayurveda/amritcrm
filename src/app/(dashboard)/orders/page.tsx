@@ -28,12 +28,12 @@ const BUCKET_CLR: Record<string,string> = { New:"#3b82f6", Calling:"#0ea5e9", Ca
 
 type Filters = {
   status:string; source:string; payment:string; phone:string; orderId:string; customer:string; city:string;
-  pincode:string; product:string; stateId:string; districtId:string; leadOwner:string; zm:string;
-  orderFrom:string; orderTo:string; followFrom:string; followTo:string; assignFrom:string; assignTo:string;
+  pincode:string; product:string; stateId:string; districtId:string; leadOwner:string; zm:string; awb:string; courier:string;
+  orderFrom:string; orderTo:string; followFrom:string; followTo:string; assignFrom:string; assignTo:string; bookedFrom:string; bookedTo:string; dealerFrom:string; dealerTo:string;
   statusFrom:string; statusTo:string; statusChange:string;
   cod:string; onlinePaidOnly:string; highValue:string; shipStatus:string; statusIn:string; minValue:string; followDue:string; queue:string;
 };
-const EMPTY: Filters = { status:"", source:"", payment:"", phone:"", orderId:"", customer:"", city:"", pincode:"", product:"", stateId:"", districtId:"", leadOwner:"", zm:"", orderFrom:"", orderTo:"", followFrom:"", followTo:"", assignFrom:"", assignTo:"", statusFrom:"", statusTo:"", statusChange:"", cod:"", onlinePaidOnly:"", highValue:"", shipStatus:"", statusIn:"", minValue:"", followDue:"", queue:"" };
+const EMPTY: Filters = { status:"", source:"", payment:"", phone:"", orderId:"", customer:"", city:"", pincode:"", product:"", stateId:"", districtId:"", leadOwner:"", zm:"", awb:"", courier:"", orderFrom:"", orderTo:"", followFrom:"", followTo:"", assignFrom:"", assignTo:"", bookedFrom:"", bookedTo:"", dealerFrom:"", dealerTo:"", statusFrom:"", statusTo:"", statusChange:"", cod:"", onlinePaidOnly:"", highValue:"", shipStatus:"", statusIn:"", minValue:"", followDue:"", queue:"" };
 
 const COLS = ["Order ID","Date","Customer","Phone","Product","Qty","Amount","Total","Online","Balance","Status","Payment","Source","City","State","District","Pincode","Address","Follow-up","Lead Owner","Agent Assign","Dealer","Dealer Assign","ZM","AWB","Shipping","Remark","Actions"];
 const d = (s?: string | null) => (s ? new Date(s).toLocaleDateString("en-IN") : "-");
@@ -49,6 +49,7 @@ export default function OrdersPage() {
   const [limit, setLimit] = useState("20");
   const [showFilters, setShowFilters] = useState(true);
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [statusOpen, setStatusOpen] = useState(false);
   const [sourceNames, setSourceNames] = useState<string[]>([]);
   const [shipStatusList, setShipStatusList] = useState<string[]>([]);
   const [shipOpen, setShipOpen] = useState(false);
@@ -422,9 +423,19 @@ export default function OrdersPage() {
         <div className="card p-4 mb-4">
           <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
             <div><label className="label">Status</label>
-              <select className="input" value={form.status} onChange={(e) => sf("status", e.target.value)}>
-                <option value="">All</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}
-              </select></div>
+              <button type="button" onClick={() => setStatusOpen(true)} className="input w-full flex items-center justify-between text-left">
+                <span>{form.status || "All"}</span><span className="text-gray-400">&#9662;</span>
+              </button>
+              {statusOpen && <>
+                <div className="fixed inset-0 z-40 bg-black/30" onClick={() => setStatusOpen(false)} />
+                <div className="fixed inset-x-3 bottom-3 z-50 max-h-[76vh] overflow-y-auto rounded-2xl bg-white shadow-2xl border border-gray-200">
+                  <div className="sticky top-0 flex items-center justify-between border-b bg-white px-4 py-3"><b>Select status</b><button type="button" onClick={() => setStatusOpen(false)} className="text-sm font-semibold text-gray-500">Close</button></div>
+                  {["", ...statuses].map((s) => <button key={s || "all"} type="button" onClick={() => { sf("status", s); setStatusOpen(false); }} className="flex w-full items-center justify-between border-b px-4 py-4 text-left text-base hover:bg-gray-50">
+                    <span className="font-medium">{s || "All"}</span><span className={form.status === s ? "h-5 w-5 rounded-full border-[6px] border-emerald-500" : "h-5 w-5 rounded-full border-2 border-gray-300"} />
+                  </button>)}
+                </div>
+              </>}
+            </div>
             <div><label className="label">Source</label>
               <select className="input" value={form.source} onChange={(e) => sf("source", e.target.value)}>
                 <option value="">All</option>{sourceNames.map((s) => <option key={s} value={s}>{s}</option>)}
@@ -445,6 +456,8 @@ export default function OrdersPage() {
 
             <div><label className="label">Phone</label><input className="input" value={form.phone} onChange={(e) => sf("phone", e.target.value)} onKeyDown={onKey} /></div>
             <div><label className="label">Order ID</label><input className="input" value={form.orderId} onChange={(e) => sf("orderId", e.target.value)} onKeyDown={onKey} placeholder="PHCRM..." /></div>
+            <div><label className="label">AWB / Article No.</label><input className="input" value={form.awb} onChange={(e) => sf("awb", e.target.value)} onKeyDown={onKey} placeholder="SF... / EY..." /></div>
+            <div><label className="label">Courier</label><input className="input" value={form.courier} onChange={(e) => sf("courier", e.target.value)} onKeyDown={onKey} placeholder="Courier name" /></div>
             <div><label className="label">Customer</label><input className="input" value={form.customer} onChange={(e) => sf("customer", e.target.value)} onKeyDown={onKey} /></div>
             <div><label className="label">City</label><input className="input" value={form.city} onChange={(e) => sf("city", e.target.value)} onKeyDown={onKey} /></div>
             <div><label className="label">Product</label><input className="input" value={form.product} onChange={(e) => sf("product", e.target.value)} onKeyDown={onKey} /></div>
@@ -463,6 +476,10 @@ export default function OrdersPage() {
             <div><label className="label">Follow-up to</label><input type="date" className="input" value={form.followTo} onChange={(e) => sf("followTo", e.target.value)} /></div>
             <div><label className="label">Agent assign from</label><input type="date" className="input" value={form.assignFrom} onChange={(e) => sf("assignFrom", e.target.value)} /></div>
             <div><label className="label">Agent assign to</label><input type="date" className="input" value={form.assignTo} onChange={(e) => sf("assignTo", e.target.value)} /></div>
+            <div><label className="label">Dealer assign from</label><input type="date" className="input" value={form.dealerFrom} onChange={(e) => sf("dealerFrom", e.target.value)} /></div>
+            <div><label className="label">Dealer assign to</label><input type="date" className="input" value={form.dealerTo} onChange={(e) => sf("dealerTo", e.target.value)} /></div>
+            <div><label className="label">Booked date from</label><input type="date" className="input" value={form.bookedFrom} onChange={(e) => sf("bookedFrom", e.target.value)} /></div>
+            <div><label className="label">Booked date to</label><input type="date" className="input" value={form.bookedTo} onChange={(e) => sf("bookedTo", e.target.value)} /></div>
             <div><label className="label" style={{color:"#0ea5e9"}}>Status changed from</label><input type="date" className="input" value={form.statusFrom} onChange={(e) => sf("statusFrom", e.target.value)} /></div>
             <div><label className="label" style={{color:"#0ea5e9"}}>Status changed to</label><input type="date" className="input" value={form.statusTo} onChange={(e) => sf("statusTo", e.target.value)} /></div>
             <div><label className="label" style={{color:"#0ea5e9"}}>Status changed = (kaun-sa)</label><select className="input" value={form.statusChange} onChange={(e) => sf("statusChange", e.target.value)}><option value="">Any status</option>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select></div>
