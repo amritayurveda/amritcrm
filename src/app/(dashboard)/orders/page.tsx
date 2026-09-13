@@ -306,7 +306,7 @@ export default function OrdersPage() {
 
   return (
     <div className="p-4 md:p-6">
-      <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
+      <div className="sticky top-0 z-30 -mx-4 -mt-4 mb-4 flex items-center justify-between gap-3 border-b border-gray-200 bg-white/95 px-4 py-3 backdrop-blur md:-mx-6 md:px-6 flex-wrap">
         <div><h1 className="text-xl font-bold text-gray-900">Manage Orders</h1><p className="text-sm text-gray-500">{data?.total ?? 0} orders</p></div>
         <div className="flex gap-2 flex-wrap">
           <button className="btn btn-ghost" onClick={() => setShowFilters((s) => !s)}>{showFilters ? "Hide Filters" : "Filters"}</button>
