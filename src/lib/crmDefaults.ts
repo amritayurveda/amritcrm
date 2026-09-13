@@ -60,6 +60,7 @@ export const DEFAULT_STATUSES: StatusItem[] = [
   { name: "Pending",         color: "#f59e0b", enabled: true, core: true },
   { name: "GPO",             color: "#6366f1", enabled: true, core: true },
   { name: "GPO Pending",     color: "#a16207", enabled: true, core: true },
+  { name: "GPO Portal",      color: "#4f46e5", enabled: true, core: true },
   { name: "GPO Done",        color: "#16a34a", enabled: true, core: true },
   { name: "GPO Delivered",   color: "#15803d", enabled: true, core: true },
   { name: "Confirm cancel",  color: "#ef4444", enabled: true, core: true },
@@ -69,6 +70,9 @@ export const DEFAULT_STATUSES: StatusItem[] = [
   { name: "Dealer Cancel",   color: "#b91c1c", enabled: true, core: true },
   { name: "Future Delivery", color: "#0ea5e9", enabled: true, core: true },
   { name: "UNA",             color: "#64748b", enabled: true, core: true },
+  { name: "NDR",             color: "#d97706", enabled: true, core: true },
+  { name: "Lost",            color: "#7f1d1d", enabled: true, core: true },
   { name: "RTO",             color: "#e11d48", enabled: true, core: true },
+  { name: "Double Cancel",   color: "#991b1b", enabled: true, core: true },
 ];
 export const CORE_STATUS_NAMES: string[] = DEFAULT_STATUSES.map((s) => s.name);
