@@ -150,7 +150,7 @@ export default function ReportsPage() {
                   ))}
                 </div>
                 <div>
-                  <div className="text-xs font-semibold text-gray-500 mb-2">Courier-wise Split</div>
+                  <div id="courier-performance" className="text-xs font-semibold text-gray-500 mb-2 scroll-mt-20">Courier Performance — Courier-wise Split</div>
                   <div className="overflow-x-auto">
                     <table className="text-sm w-full">
                       <thead className="text-gray-500 text-left text-xs"><tr><th className="py-1">Courier</th><th className="py-1 text-right">Total</th><th className="py-1 text-right">Delivered</th><th className="py-1 text-right">Deliv%</th></tr></thead>
@@ -216,7 +216,8 @@ export default function ReportsPage() {
           </div>
 
           <div className="card p-4 mb-4">
-            <h2 className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-base"><span>&#128101;</span>Agent / Lead Owner Performance</h2>
+            <h2 id="call-monitoring" className="font-bold text-gray-900 mb-3 flex items-center gap-2 text-base scroll-mt-20"><span>&#128101;</span>Call Monitoring — Agent Activity</h2>
+            <p className="text-sm text-gray-500 mb-3">Order activity and follow-up reporting only. Live calls, call duration and recordings are not connected.</p>
             {rep.agentSummary && (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2 mb-4">
                 <div className="rounded-lg bg-indigo-50 border border-indigo-100 p-2 text-center"><div className="text-[10px] text-indigo-500 font-semibold uppercase">Assigned</div><div className="text-xl font-extrabold text-indigo-700">{rep.agentSummary.totalAssigned}</div></div>
