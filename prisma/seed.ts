@@ -40,14 +40,14 @@ async function main() {
     ]});
   }
 
-  const email = process.env.SUPERADMIN_EMAIL || "admin@amriayurveda.in";
+  const email = (process.env.SUPERADMIN_EMAIL || "admin@amritayurveda.in").toLowerCase().trim();
   const password = process.env.SUPERADMIN_PASSWORD || "ChangeThisOnFirstLogin@123";
   const name = process.env.SUPERADMIN_NAME || "Super Admin";
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.user.upsert({
     where:{email},
-    update:{ role:"SUPER_ADMIN", isActive:true },
-    create:{ name, email, passwordHash, role:"SUPER_ADMIN", isActive:true, mustChangePw:true },
+    update:{ name, passwordHash, role:"SUPER_ADMIN", isActive:true, mustChangePw:false },
+    create:{ name, email, passwordHash, role:"SUPER_ADMIN", isActive:true, mustChangePw:false },
   });
   console.log("SUPER_ADMIN:", email, "(password from .env)");
 

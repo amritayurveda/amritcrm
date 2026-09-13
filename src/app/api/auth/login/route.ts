@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { verifyPassword, signToken } from "@/lib/auth";
+import { hashPassword, verifyPassword, signToken } from "@/lib/auth";
 import { defaultPermissionsForRole, type RoleName } from "@/lib/permissions";
 import { audit, bad } from "@/lib/apiHelpers";
 
@@ -9,7 +9,42 @@ export const runtime = "nodejs";
 export async function POST(req: NextRequest) {
   const { email, password } = await req.json().catch(() => ({}));
   if (!email || !password) return bad("Email and password required");
-  const user = await prisma.user.findUnique({ where: { email: String(email).toLowerCase().trim() } });
+  const normalizedEmail = String(email).toLowerCase().trim();
+  const configuredEmail = process.env.SUPERADMIN_EMAIL?.toLowerCase().trim();
+  const configuredPassword = process.env.SUPERADMIN_PASSWORD;
+
+  let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+  // Repair a missing or stale Super Admin record after a database change.
+  // This path is only available when the submitted credentials exactly match
+  // the private values configured in the deployment environment.
+  if (
+    configuredEmail &&
+    configuredPassword &&
+    normalizedEmail === configuredEmail &&
+    password === configuredPassword &&
+    (!user || !user.isActive || !(await verifyPassword(password, user.passwordHash)))
+  ) {
+    user = await prisma.user.upsert({
+      where: { email: configuredEmail },
+      update: {
+        name: process.env.SUPERADMIN_NAME || "Super Admin",
+        passwordHash: await hashPassword(configuredPassword),
+        role: "SUPER_ADMIN",
+        isActive: true,
+        mustChangePw: false,
+      },
+      create: {
+        name: process.env.SUPERADMIN_NAME || "Super Admin",
+        email: configuredEmail,
+        passwordHash: await hashPassword(configuredPassword),
+        role: "SUPER_ADMIN",
+        isActive: true,
+        mustChangePw: false,
+      },
+    });
+  }
+
   if (!user || !user.isActive) { await audit(user?.id ?? null, "auth.login_failed", "user", user?.id, { email: String(email).toLowerCase().trim(), reason: user ? "inactive" : "no_user" }); return bad("Invalid credentials or inactive account", 401); }
   if (!(await verifyPassword(password, user.passwordHash))) { await audit(user.id, "auth.login_failed", "user", user.id, { email: user.email, reason: "bad_password" }); return bad("Invalid credentials", 401); }
 
