@@ -37,7 +37,7 @@ export async function GET(req: NextRequest) {
   { const and: any[] = [];
     { const v = sp.get("phone"); if (v) and.push({ OR: [{ contactNumber: { contains: v } }, { altMobile: { contains: v } }] }); }
     { const v = sp.get("source"); if (v) and.push({ OR: [{ source: v }, { sourceTags: { contains: '"' + v + '"' } }] }); }
-    if (and.length) where.AND = and; } contains("orderId","orderCode"); contains("city","city"); contains("customer","customerName");
+  if (and.length) where.AND = and; } contains("orderId","orderCode"); contains("city","city"); contains("customer","customerName"); contains("awb","awbCode"); contains("courier","courierName");
   if (can(user, "orders.viewAll")) {
     const lo = sp.get("leadOwner");
     if (lo === "0") where.leadOwnerId = null; else if (lo) where.leadOwnerId = Number(lo);
@@ -46,7 +46,7 @@ export async function GET(req: NextRequest) {
     const from = sp.get(fromK), to = sp.get(toK);
     if (from || to) where[f] = { ...(from ? { gte: new Date(from + "T00:00:00.000+05:30") } : {}), ...(to ? { lte: new Date(to + "T23:59:59.999+05:30") } : {}) };
   };
-  range("orderFrom","orderTo","dateTime"); range("followFrom","followTo","followUpDate"); range("assignFrom","assignTo","agentAssignDate");
+  range("orderFrom","orderTo","dateTime"); range("followFrom","followTo","followUpDate"); range("assignFrom","assignTo","agentAssignDate"); range("dealerFrom","dealerTo","dealerAssignDate"); range("bookedFrom","bookedTo","bookedAt");
   // Phase 4-B: Status-change date / status filter (uses OrderStatusActivity relation; additive AND).
   { const sf2 = sp.get("statusFrom"), st2 = sp.get("statusTo"), sStat = sp.get("statusChange");
     if (sf2 || st2 || sStat) {
