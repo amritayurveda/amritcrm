@@ -25,7 +25,7 @@ export async function getCrmSettings(): Promise<CrmSettings> {
 
 // Phase 2B-2: status config. DB over defaults. Guarantees:
 //   - never throws (any error => DEFAULT_STATUSES)
-//   - all 19 core statuses always present (self-heal if a row is corrupt)
+//   - all core statuses always present (self-heal if a row is corrupt)
 //   - "New" can never be disabled (ingest creates orders as "New")
 export async function getStatusConfig(): Promise<StatusItem[]> {
   try {
