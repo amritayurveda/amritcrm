@@ -5,6 +5,7 @@ import { api } from "@/lib/apiClient";
 import { DEFAULT_CRM } from "@/lib/crmDefaults";
 import { REVENUE_STATUSES } from "@/lib/statuses";
 import { useAuth } from "@/store/auth";
+import { StatusPicker } from "@/components/orders/StatusPicker";
 
 function parseTags(v: any): string[] {
   if (Array.isArray(v)) return v;
@@ -306,7 +307,7 @@ export function OrderForm({ orderId }: { orderId?: string }) {
             <F label="State"><select className="input" value={form.stateId} onChange={(e) => { set("stateId", e.target.value); set("districtId", ""); setDistrictText(""); }}><option value="">-</option>{states.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}</select></F>
             <F label="District"><input className="input" list="district-options" placeholder="Type district name" value={districtText} onChange={(e) => { setDistrictText(e.target.value); set("districtId", ""); }} /><datalist id="district-options">{districts.map((dd) => <option key={dd.id} value={dd.name} />)}</datalist></F>
             <F label="Source"><select className="input" value={form.source} onChange={(e) => set("source", e.target.value)}>{sourceOptions.map((s) => <option key={s} value={s}>{s}</option>)}</select></F>
-            <F label="Status"><select className="input" value={form.orderStatus} onChange={(e) => { set("orderStatus", e.target.value); set("followUpDate", ""); }}>{(form.orderStatus && !statuses.includes(form.orderStatus) ? [form.orderStatus, ...statuses] : statuses).map((s) => <option key={s} value={s}>{s}</option>)}</select></F>
+            <F label="Status"><StatusPicker value={form.orderStatus} statuses={statuses} onChange={(status) => { set("orderStatus", status); set("followUpDate", ""); }} /></F>
             {needsFollowUp && (
               <div className={"md:col-span-2 rounded-xl border-2 p-3 " + (form.orderStatus === "Callback" ? "border-orange-300 bg-orange-50" : form.orderStatus === "Future Delivery" ? "border-blue-300 bg-blue-50" : "border-amber-300 bg-amber-50")}>
                 <label className={"block text-xs font-bold mb-1 " + (form.orderStatus === "Callback" ? "text-orange-700" : form.orderStatus === "Future Delivery" ? "text-blue-700" : "text-amber-700")}>
