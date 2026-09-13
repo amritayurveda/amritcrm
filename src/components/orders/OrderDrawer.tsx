@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/apiClient";
 import type { Order } from "@/types";
+import { StatusPicker } from "@/components/orders/StatusPicker";
 
 function parseTags(v: any): string[] {
   if (Array.isArray(v)) return v;
@@ -137,7 +138,7 @@ export function OrderDrawer({ order, statuses, sources, onClose, onSaved }: Prop
           </div>
           <div className="grid grid-cols-2 gap-3">
             <F label="Source"><select className="input" value={form.source} onChange={(e) => set("source", e.target.value)}>{sources.map((s) => <option key={s.id} value={s.name}>{s.name}</option>)}</select></F>
-            <F label="Status"><select className="input" value={form.orderStatus} onChange={(e) => set("orderStatus", e.target.value)}>{statuses.map((s) => <option key={s} value={s}>{s}</option>)}</select></F>
+            <F label="Status"><StatusPicker value={form.orderStatus} statuses={statuses} onChange={(status) => set("orderStatus", status)} /></F>
           </div>
           <F label="Remark"><textarea className="input" rows={2} value={form.remark} onChange={(e) => set("remark", e.target.value)} /></F>
           {err && <p className="text-sm text-red-600">{err}</p>}
