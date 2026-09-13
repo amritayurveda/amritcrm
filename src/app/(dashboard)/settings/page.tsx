@@ -37,6 +37,11 @@ function Locked({ phase, points }: { phase: string; points: string[] }) {
 export default function SettingsPage() {
   const { user } = useAuth();
   const [tab, setTab] = useState("sources");
+  useEffect(() => {
+    const sync = () => { if (window.location.hash === "#dealers") setTab("dealers"); };
+    sync(); window.addEventListener("hashchange", sync);
+    return () => window.removeEventListener("hashchange", sync);
+  }, []);
   const [sources, setSources] = useState<Src[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
   const [stFull, setStFull] = useState<StItem[] | null>(null);
