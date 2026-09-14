@@ -20,7 +20,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const pathname = usePathname();
   const { user, token, logout, can } = useAuth();
   const hydrated = useHydrated();
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
   const [dark, setDark] = useState(false);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState("");
@@ -53,12 +53,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   useEffect(() => { if (hydrated && !token) router.replace("/login"); }, [hydrated, token, router]);
-  useEffect(() => { setOpen(false); }, [pathname]);
 
   if (!hydrated) return null;
   if (!token || !user) return null;
 
-  // Super Admin must always see the complete owner menu. Other roles still follow permissions.
   const visible = NAV.filter((n) => {
     if (user.role === "SUPER_ADMIN") return true;
     if (n.superOnly) return false;
@@ -91,7 +89,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={n.href}
                 href={n.href}
-                onClick={() => setOpen(false)}
                 className={
                   "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition relative whitespace-nowrap " +
                   (active ? "bg-white/12 text-white shadow-sm" : "text-slate-200 hover:bg-white/8 hover:text-white")
