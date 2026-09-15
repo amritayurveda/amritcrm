@@ -6,13 +6,36 @@ import { useAuth } from "@/store/auth";
 import { useHydrated } from "@/lib/useHydrated";
 import { api } from "@/lib/apiClient";
 
-interface NavItem { href: string; label: string; icon: string; perm?: string; superOnly?: boolean; }
+interface NavItem {
+  href?: string;
+  label: string;
+  icon: string;
+  perm?: string;
+  superOnly?: boolean;
+  popup?: boolean;
+}
+
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "📊", perm: "orders.view" },
   { href: "/orders", label: "Manage Orders", icon: "📦", perm: "orders.view" },
-  { href: "/settings#dealers", label: "Dealer Management", icon: "🏪", superOnly: true },
   { href: "/reports", label: "Reports", icon: "📈", perm: "reports.view" },
   { href: "/reports/sales", label: "Sales Report", icon: "💰", perm: "reports.view" },
+  { label: "Incentive", icon: "🏆", popup: true },
+  { label: "Courier Performance", icon: "🚚", popup: true },
+  { label: "Call Monitoring", icon: "📞", popup: true },
+  { href: "/users", label: "Users & Access", icon: "👤", superOnly: true },
+  { href: "/settings", label: "Settings", icon: "⚙️", superOnly: true },
+  { href: "/system", label: "System Health", icon: "🩺", superOnly: true },
+  { href: "/audit", label: "Audit Logs", icon: "📜", superOnly: true },
+  { href: "/shiprocket", label: "Shiprocket", icon: "🚚", superOnly: true },
+  { label: "India Post", icon: "📮", popup: true, superOnly: true },
+];
+
+const DEALER_NAV: NavItem[] = [
+  { href: "/settings#dealers", label: "Manage Dealer", icon: "🏪", superOnly: true },
+  { label: "Payment Ledger", icon: "🧾", popup: true, superOnly: true },
+  { label: "Dealer Cumulative Report", icon: "📈", popup: true, superOnly: true },
+  { label: "Manage Invoice", icon: "📄", popup: true, superOnly: true },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -21,12 +44,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const { user, token, logout, can } = useAuth();
   const hydrated = useHydrated();
   const [open, setOpen] = useState(true);
+  const [dealerOpen, setDealerOpen] = useState(true);
   const [dark, setDark] = useState(false);
+  const [modulePopup, setModulePopup] = useState<string | null>(null);
   const [passwordOpen, setPasswordOpen] = useState(false);
   const [passwordMessage, setPasswordMessage] = useState("");
   const [passwordBusy, setPasswordBusy] = useState(false);
 
   useEffect(() => { setDark(localStorage.getItem("crm-dark-mode") === "true"); }, []);
+
+  function toggleDarkMode() {
+    const next = !dark;
+    setDark(next);
+    localStorage.setItem("crm-dark-mode", String(next));
+  }
 
   async function changePassword(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -57,11 +88,44 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   if (!hydrated) return null;
   if (!token || !user) return null;
 
-  const visible = NAV.filter((n) => {
+  const isVisible = (n: NavItem) => {
     if (user.role === "SUPER_ADMIN") return true;
     if (n.superOnly) return false;
     return !n.perm || can(n.perm);
-  });
+  };
+
+  const visible = NAV.filter(isVisible);
+  const visibleDealer = DEALER_NAV.filter(isVisible);
+
+  const itemClass = (active = false, nested = false) =>
+    "flex w-full items-center gap-3 rounded-xl text-left font-semibold transition relative whitespace-nowrap " +
+    (nested ? "px-4 py-2.5 text-[13px] " : "px-4 py-3 text-[15px] ") +
+    (active ? "bg-white/12 text-white shadow-sm" : "text-slate-200 hover:bg-white/8 hover:text-white");
+
+  const renderItem = (n: NavItem, nested = false) => {
+    const active = !!n.href && !n.href.includes("#") && pathname === n.href;
+    const content = (
+      <>
+        {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r bg-emerald-400" />}
+        <span className={nested ? "text-base w-5 text-center shrink-0" : "text-xl w-6 text-center shrink-0"}>{n.icon}</span>
+        <span className="truncate">{n.label}</span>
+      </>
+    );
+
+    if (n.href) {
+      return (
+        <Link key={n.label} href={n.href} className={itemClass(active, nested)} onClick={() => setOpen(false)}>
+          {content}
+        </Link>
+      );
+    }
+
+    return (
+      <button key={n.label} type="button" className={itemClass(false, nested)} onClick={() => setModulePopup(n.label)}>
+        {content}
+      </button>
+    );
+  };
 
   return (
     <div className={"h-screen flex bg-[#EEF2F7] overflow-hidden " + (dark ? "crm-dark" : "")}>
@@ -72,55 +136,68 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         "fixed md:static inset-y-0 left-0 z-40 shadow-2xl md:shadow-none transition-transform duration-200 md:translate-x-0 " +
         (open ? "translate-x-0" : "-translate-x-full")
       }>
-        <div className="px-6 py-5 border-b border-white/10 flex items-center justify-between shrink-0">
+        <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between shrink-0">
           <div className="min-w-0">
-            <div className="font-extrabold text-xl leading-tight text-white whitespace-nowrap">Amrit Ayurveda</div>
-            <div className="text-xs text-emerald-300 mt-1">CRM - Pure Ayurveda</div>
+            <div className="font-extrabold text-lg leading-tight text-white whitespace-nowrap">Amrit Ayurveda</div>
+            <div className="text-[11px] text-emerald-300 mt-1">CRM - Pure Ayurveda</div>
           </div>
           <button className="md:hidden text-slate-300 hover:text-white ml-3" onClick={() => setOpen(false)} aria-label="Close menu">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </div>
 
-        <nav className="flex-1 px-4 py-5 space-y-2 overflow-y-auto overscroll-contain">
-          {visible.map((n) => {
-            const active = !n.href.includes("#") && pathname === n.href;
-            return (
-              <Link
-                key={n.href}
-                href={n.href}
-                className={
-                  "flex w-full items-center gap-3 rounded-xl px-4 py-3 text-[15px] font-semibold transition relative whitespace-nowrap " +
-                  (active ? "bg-white/12 text-white shadow-sm" : "text-slate-200 hover:bg-white/8 hover:text-white")
-                }
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto overscroll-contain">
+          {renderItem(visible[0])}
+          {renderItem(visible[1])}
+
+          {visibleDealer.length > 0 && (
+            <div>
+              <button
+                type="button"
+                onClick={() => setDealerOpen((v) => !v)}
+                className={itemClass(pathname === "/settings", false)}
               >
-                {active && <span className="absolute left-0 top-1/2 -translate-y-1/2 h-7 w-1 rounded-r bg-emerald-400" />}
-                <span className="text-xl w-6 text-center shrink-0">{n.icon}</span>
-                <span>{n.label}</span>
-              </Link>
-            );
-          })}
+                <span className="text-xl w-6 text-center shrink-0">🏪</span>
+                <span className="flex-1 text-left">Dealer Management</span>
+                <span className={"text-xs transition-transform " + (dealerOpen ? "rotate-180" : "")}>⌄</span>
+              </button>
+              {dealerOpen && (
+                <div className="ml-4 pl-2 border-l border-white/10 mt-1 space-y-1">
+                  {visibleDealer.map((n) => renderItem(n, true))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {visible.slice(2).map((n) => renderItem(n))}
         </nav>
 
-        <div className="border-t border-white/10 p-4 shrink-0 bg-slate-900/30">
-          <div className="flex items-center gap-3 px-2 mb-3">
-            <div className="h-10 w-10 rounded-full bg-emerald-500 text-white grid place-items-center font-bold shrink-0">
+        <div className="border-t border-white/10 p-3 shrink-0 bg-slate-900/40">
+          <div className="flex items-center gap-3 px-2 mb-2">
+            <div className="h-9 w-9 rounded-full bg-emerald-500 text-white grid place-items-center font-bold shrink-0">
               {(user.name || "U").slice(0, 1).toUpperCase()}
             </div>
             <div className="min-w-0">
               <div className="text-sm font-semibold text-white truncate">{user.name}</div>
-              <div className="text-[11px] text-emerald-300">{user.role}</div>
+              <div className="text-[10px] text-emerald-300">{user.role}</div>
             </div>
           </div>
 
           <button
-            className="w-full mb-2 rounded-xl bg-white/5 hover:bg-white/10 px-4 py-2.5 text-sm font-medium text-left transition"
+            type="button"
+            className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition"
+            onClick={toggleDarkMode}
+          >
+            {dark ? "☀️ Light Mode" : "🌙 Dark Mode"}
+          </button>
+          <button
+            className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition"
             onClick={() => { setPasswordMessage(""); setPasswordOpen(true); }}
           >
             🔐 Change Password
           </button>
           <button
-            className="w-full rounded-xl bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 px-4 py-2.5 text-sm font-medium text-left transition"
+            className="w-full rounded-lg bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 px-4 py-2 text-sm font-medium text-left transition"
             onClick={() => { logout(); router.replace("/login"); }}
           >
             ↪ Sign Out
@@ -137,6 +214,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </div>
         {children}
       </main>
+
+      {modulePopup && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+          <div className="card p-5 w-full max-w-sm space-y-4">
+            <h2 className="text-lg font-bold">{modulePopup}</h2>
+            <p className="text-sm text-slate-600">This option has been added to the CRM sidebar. Its dedicated module can be connected here without changing the rest of the CRM.</p>
+            <div className="flex justify-end">
+              <button type="button" className="btn btn-primary" onClick={() => setModulePopup(null)}>OK</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {passwordOpen && (
         <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-labelledby="password-title">
