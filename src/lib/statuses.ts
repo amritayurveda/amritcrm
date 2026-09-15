@@ -1,6 +1,6 @@
 /** Order status lifecycle used by the order-status selector and workflow. */
 export const ORDER_STATUSES = [
-  "New","Confirm Pending","Confirm","Confirmed","In Transit","Delivered","Callback","Pending",
+  "New","Confirm Pending","Confirmed","In Transit","Delivered","Callback","Pending",
   "GPO","GPO Pending","GPO Portal","GPO Done","GPO Delivered","Confirm cancel","Cancel pending",
   "Final cancel","Cancel","Cancelled","Dealer Cancel","Future Delivery","UNA","NDR","Lost","RTO","Double Cancel",
 ] as const;
