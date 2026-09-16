@@ -20,22 +20,22 @@ const NAV: NavItem[] = [
   { href: "/orders", label: "Manage Orders", icon: "📦", perm: "orders.view" },
   { href: "/reports", label: "Reports", icon: "📈", perm: "reports.view" },
   { href: "/reports/sales", label: "Sales Report", icon: "💰", perm: "reports.view" },
-  { label: "Incentive", icon: "🏆", popup: true },
-  { label: "Courier Performance", icon: "🚚", popup: true },
-  { label: "Call Monitoring", icon: "📞", popup: true },
+  { href: "/incentive", label: "Incentive", icon: "🏆" },
+  { href: "/courier-performance", label: "Courier Performance", icon: "🚚" },
+  { href: "/call-monitoring", label: "Call Monitoring", icon: "📞" },
   { href: "/users", label: "Users & Access", icon: "👤", superOnly: true },
   { href: "/settings", label: "Settings", icon: "⚙️", superOnly: true },
   { href: "/system", label: "System Health", icon: "🩺", superOnly: true },
   { href: "/audit", label: "Audit Logs", icon: "📜", superOnly: true },
   { href: "/shiprocket", label: "Shiprocket", icon: "🚚", superOnly: true },
-  { label: "India Post", icon: "📮", popup: true, superOnly: true },
+  { href: "/india-post", label: "India Post", icon: "📮", superOnly: true },
 ];
 
 const DEALER_NAV: NavItem[] = [
   { href: "/settings#dealers", label: "Manage Dealer", icon: "🏪", superOnly: true },
-  { label: "Payment Ledger", icon: "🧾", popup: true, superOnly: true },
-  { label: "Dealer Cumulative Report", icon: "📈", popup: true, superOnly: true },
-  { label: "Manage Invoice", icon: "📄", popup: true, superOnly: true },
+  { href: "/dealer/payment-ledger", label: "Payment Ledger", icon: "🧾", superOnly: true },
+  { href: "/dealer/cumulative-report", label: "Dealer Cumulative Report", icon: "📈", superOnly: true },
+  { href: "/dealer/invoices", label: "Manage Invoice", icon: "📄", superOnly: true },
 ];
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -155,7 +155,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <button
                 type="button"
                 onClick={() => setDealerOpen((v) => !v)}
-                className={itemClass(pathname === "/settings", false)}
+                className={itemClass(pathname.startsWith("/dealer") || pathname === "/settings", false)}
               >
                 <span className="text-xl w-6 text-center shrink-0">🏪</span>
                 <span className="flex-1 text-left">Dealer Management</span>
@@ -183,23 +183,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             </div>
           </div>
 
-          <button
-            type="button"
-            className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition"
-            onClick={toggleDarkMode}
-          >
+          <button type="button" className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition" onClick={toggleDarkMode}>
             {dark ? "☀️ Light Mode" : "🌙 Dark Mode"}
           </button>
-          <button
-            className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition"
-            onClick={() => { setPasswordMessage(""); setPasswordOpen(true); }}
-          >
+          <button className="w-full mb-2 rounded-lg bg-white/5 hover:bg-white/10 px-4 py-2 text-sm font-medium text-left transition" onClick={() => { setPasswordMessage(""); setPasswordOpen(true); }}>
             🔐 Change Password
           </button>
-          <button
-            className="w-full rounded-lg bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 px-4 py-2 text-sm font-medium text-left transition"
-            onClick={() => { logout(); router.replace("/login"); }}
-          >
+          <button className="w-full rounded-lg bg-white/5 hover:bg-red-500/20 text-red-300 hover:text-red-200 px-4 py-2 text-sm font-medium text-left transition" onClick={() => { logout(); router.replace("/login"); }}>
             ↪ Sign Out
           </button>
         </div>
@@ -220,9 +210,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           <div className="card p-5 w-full max-w-sm space-y-4">
             <h2 className="text-lg font-bold">{modulePopup}</h2>
             <p className="text-sm text-slate-600">This option has been added to the CRM sidebar. Its dedicated module can be connected here without changing the rest of the CRM.</p>
-            <div className="flex justify-end">
-              <button type="button" className="btn btn-primary" onClick={() => setModulePopup(null)}>OK</button>
-            </div>
+            <div className="flex justify-end"><button type="button" className="btn btn-primary" onClick={() => setModulePopup(null)}>OK</button></div>
           </div>
         </div>
       )}
