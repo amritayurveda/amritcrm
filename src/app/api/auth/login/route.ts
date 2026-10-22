@@ -12,38 +12,63 @@ export async function POST(req: NextRequest) {
   const normalizedEmail = String(email).toLowerCase().trim();
   const configuredEmail = process.env.SUPERADMIN_EMAIL?.toLowerCase().trim();
   const configuredPassword = process.env.SUPERADMIN_PASSWORD;
-
-  let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
-
-  // Bootstrap a missing Super Admin record after a database change.
-  // Never overwrite an existing password or reactivate a disabled account.
-  // This path is only available when the submitted credentials exactly match
-  // the private values configured in the deployment environment.
-  if (
+  const configuredName = process.env.SUPERADMIN_NAME || "Super Admin";
+  const matchesConfiguredSuperAdmin = Boolean(
     configuredEmail &&
     configuredPassword &&
     normalizedEmail === configuredEmail &&
-    password === configuredPassword &&
-    !user
-  ) {
-    user = await prisma.user.upsert({
-      where: { email: configuredEmail },
-      update: {
-        name: process.env.SUPERADMIN_NAME || "Super Admin",
-        passwordHash: await hashPassword(configuredPassword),
-        role: "SUPER_ADMIN",
-        isActive: true,
-        mustChangePw: false,
-      },
-      create: {
-        name: process.env.SUPERADMIN_NAME || "Super Admin",
-        email: configuredEmail,
-        passwordHash: await hashPassword(configuredPassword),
-        role: "SUPER_ADMIN",
-        isActive: true,
-        mustChangePw: false,
-      },
-    });
+    password === configuredPassword
+  );
+
+  let user = await prisma.user.findUnique({ where: { email: normalizedEmail } });
+
+  // Reconcile the deployment's configured Super Admin with the database.
+  // This repairs a missing row, stale password hash, role drift, or an
+  // accidentally disabled account, but only when the submitted credentials
+  // exactly match the private values configured in the deployment environment.
+  if (matchesConfiguredSuperAdmin && configuredEmail && configuredPassword) {
+    let passwordIsCurrent = false;
+    if (user) {
+      try {
+        passwordIsCurrent = await verifyPassword(configuredPassword, user.passwordHash);
+      } catch {
+        passwordIsCurrent = false;
+      }
+    }
+
+    const needsSync =
+      !user ||
+      !passwordIsCurrent ||
+      user.name !== configuredName ||
+      user.role !== "SUPER_ADMIN" ||
+      !user.isActive ||
+      user.mustChangePw;
+
+    if (needsSync) {
+      const passwordHash =
+        passwordIsCurrent && user
+          ? user.passwordHash
+          : await hashPassword(configuredPassword);
+
+      user = await prisma.user.upsert({
+        where: { email: configuredEmail },
+        update: {
+          name: configuredName,
+          passwordHash,
+          role: "SUPER_ADMIN",
+          isActive: true,
+          mustChangePw: false,
+        },
+        create: {
+          name: configuredName,
+          email: configuredEmail,
+          passwordHash,
+          role: "SUPER_ADMIN",
+          isActive: true,
+          mustChangePw: false,
+        },
+      });
+    }
   }
 
   if (!user || !user.isActive) { await audit(user?.id ?? null, "auth.login_failed", "user", user?.id, { email: String(email).toLowerCase().trim(), reason: user ? "inactive" : "no_user" }); return bad("Invalid credentials or inactive account", 401); }
