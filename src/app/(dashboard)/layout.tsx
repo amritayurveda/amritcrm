@@ -18,6 +18,7 @@ interface NavItem {
 const NAV: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: "📊", perm: "orders.view" },
   { href: "/orders", label: "Manage Orders", icon: "📦", perm: "orders.view" },
+  { href: "/abandoned-cart", label: "Abandoned Cart", icon: "🛒", perm: "orders.viewAll" },
   { href: "/reports", label: "Reports", icon: "📈", perm: "reports.view" },
   { href: "/reports/sales", label: "Sales Report", icon: "💰", perm: "reports.view" },
   { href: "/incentive", label: "Incentive", icon: "🏆" },
@@ -149,6 +150,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto overscroll-contain">
           {renderItem(visible[0])}
           {renderItem(visible[1])}
+          {visible.filter((item) => item.href === "/abandoned-cart").map((item) => renderItem(item))}
 
           {visibleDealer.length > 0 && (
             <div>

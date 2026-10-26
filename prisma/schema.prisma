@@ -289,3 +289,19 @@ model WhatsAppMessage {
   @@index([orderId])
   @@index([createdAt])
 }
+ 
+// Opted-in checkout leads, kept separate from confirmed orders.
+model AbandonedCartLead {
+  id          Int       @id @default(autoincrement())
+  phone       String    @unique
+  customerName String?
+  productName String
+  source      String    @default("Amrit Urja Abandoned Cart")
+  status      String    @default("Follow-up Pending")
+  consentAt   DateTime
+  lastSeenAt  DateTime  @default(now())
+  convertedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  @@index([status, lastSeenAt])
+}
