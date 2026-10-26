@@ -148,6 +148,15 @@ export async function POST(req: NextRequest) {
     paymentMode: b.paymentMode || null,
   }});
   await prisma.orderHistory.create({ data: { orderId: order.id, status: order.orderStatus, remark: "Order created", addedById: g.user.id } });
+  // Lead conversion is non-critical: never fail an already-created customer order.
+  try {
+    await prisma.abandonedCartLead.updateMany({
+      where: { phone, status: { not: "Converted" } },
+      data: { status: "Converted", convertedAt: new Date() },
+    });
+  } catch (err) {
+    console.error("Abandoned cart conversion sync failed", err);
+  }
   await audit(g.user.id, "order.create", "order", order.id);
   return ok({ order, duplicateWarning: dup ? "Phone already used on " + dup.orderCode : null }, 201);
 }
